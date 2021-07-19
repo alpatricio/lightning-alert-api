@@ -44,3 +44,18 @@ An example of an 'asset' is as follows:
 You might notice that the lightning strikes are in lat/long format, whereas the assets are listed in quadkey format.
 
 There is a simple conversion process, outlined [here](http://msdn.microsoft.com/en-us/library/bb259689.aspx) that you can take advantage of. Feel free to use an open source library as well.
+For each strike received, you should simply print to the console the following message:
+
+```log
+lightning alert for <assetOwner>:<assetName>
+```
+
+But substituting the proper assetOwner and assetName.
+
+i.e.:
+
+```log
+lightning alert for 6720:Dante Street
+```
+
+There's a catch though... Once we know lightning is in the area, we don't want to be alerted for it over & over again. Therefore, if you have already printed an alert for a lightning strike at a particular location, you should ignore any additional strikes that occur in that quadkey for that asset owner.
