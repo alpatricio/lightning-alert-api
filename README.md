@@ -1,5 +1,5 @@
 # lightning-alert-api
-##Lightning Alert App
+Lightning Alert App
 
 This Java Spring Boot App exposes an endpoint which accepts lightning strike info in the form of file and alerts user if a known asset has been stricken
 
