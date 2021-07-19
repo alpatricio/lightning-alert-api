@@ -50,7 +50,7 @@ An example of an 'asset' is as follows:
 
 You might notice that the lightning strikes are in lat/long format, whereas the assets are listed in quadkey format.
 
-There is a simple conversion process, outlined [here](http://msdn.microsoft.com/en-us/library/bb259689.aspx) that you can take advantage of. Feel free to use an open source library as well.
+Conversion process, outlined [here](http://msdn.microsoft.com/en-us/library/bb259689.aspx)
 For each strike received, you should simply print to the console the following message:
 
 ```log
