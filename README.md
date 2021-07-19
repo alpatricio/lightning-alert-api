@@ -65,4 +65,5 @@ i.e.:
 lightning alert for 6720:Dante Street
 ```
 
-Alert will only happen once per asset
+Note: Alert will only happen once per asset.
+So once an asset had a lightning alert, it wont be alerted for consequent lightning strikes again.
