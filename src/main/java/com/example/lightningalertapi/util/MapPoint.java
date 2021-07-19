@@ -167,7 +167,14 @@ public class MapPoint {
             return quadKey.toString();
         }
 
-
+        public static String getQuadKey(double latitude, double longitude,int levelOfDetail) {
+            int pixelY = latToPixelY(latitude, levelOfDetail);
+            int pixelX = longToPixelX(longitude, levelOfDetail);
+            int tileX = pixelToTile(pixelX);
+            int tileY = pixelToTile(pixelY);
+            String quadKey = tileXYToQuadKey(tileX, tileY, levelOfDetail);
+            return quadKey;
+        }
         /// <summary>
         /// Converts a QuadKey into tile XY coordinates.
         /// </summary>

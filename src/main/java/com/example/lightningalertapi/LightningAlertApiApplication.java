@@ -10,5 +10,4 @@ public class LightningAlertApiApplication {
         SpringApplication.run(LightningAlertApiApplication.class, args);
     }
 
-
 }
