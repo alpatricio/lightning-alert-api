@@ -16,11 +16,6 @@ public class NotificationController {
     @Autowired
     LightningService lightningService;
 
-    @GetMapping("/hello")
-    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) throws IOException {
-        return String.format("Hello %s!", name);
-    }
-
     @PostMapping("/lightning-alert")
     public ResponseEntity<Object> lightningAlert(@RequestPart("file") MultipartFile file) {
         if (null == file) {
