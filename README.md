@@ -65,4 +65,4 @@ i.e.:
 lightning alert for 6720:Dante Street
 ```
 
-There's a catch though... Once we know lightning is in the area, we don't want to be alerted for it over & over again. Therefore, if you have already printed an alert for a lightning strike at a particular location, you should ignore any additional strikes that occur in that quadkey for that asset owner.
+Alert will only happen once per asset
