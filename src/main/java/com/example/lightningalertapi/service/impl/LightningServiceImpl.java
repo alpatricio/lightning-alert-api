@@ -10,12 +10,11 @@ import net.sf.json.JSONSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class LightningServiceImpl implements LightningService {
@@ -23,9 +22,11 @@ public class LightningServiceImpl implements LightningService {
     Map<String, Asset> assets = new HashMap<>();
 
     //TODO:
-    //stream input?
     //asset loading best practice
     //exception
+    //error handling
+        //empty file
+        //non empty file malformed lines
 
     @Override
     public void lightningAlert(MultipartFile file) {
@@ -34,23 +35,27 @@ public class LightningServiceImpl implements LightningService {
             //change to asset loading best practice
             loadAssets();
 
-            //stream input?
-            byte[] bytes = file.getBytes();
-            String completeData = new String(bytes);
-            List<Object> lightningStrikes = Arrays.asList(completeData.split("\n")).stream().map(JSONSerializer::toJSON).collect(Collectors.toList());
+            //stream input
+            BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            while(reader.ready()){
+                String line = reader.readLine();
+                JSONObject strike = (JSONObject) JSONSerializer.toJSON(line);
 
+                //ignore flashType 1 : cloud to cloud & flashType 9 : heartbeat
+                //accept flashType 0: cloud to ground
+                if(strike.optInt("flashType") == 0){
+                    int pixelY = MapPoint.TileSystem.latToPixelY(((JSONObject) strike).optDouble("latitude"),12);
+                    int pixelX = MapPoint.TileSystem.longToPixelX(((JSONObject) strike).optDouble("longitude"),12);
+                    int tileX = MapPoint.TileSystem.pixelToTile(pixelX);
+                    int tileY = MapPoint.TileSystem.pixelToTile(pixelY);
+                    String quadKey = MapPoint.TileSystem.tileXYToQuadKey(tileX, tileY, 12);
+                    if(assets.get(quadKey) !=null ){
+                        System.out.println(assets.get(quadKey).getAssetName()+":"+assets.get(quadKey).getAssetOwner());
+                        assets.remove(quadKey);//dont notify anymore. remove from list to be notified
+                    }
 
-            for(Object strike: lightningStrikes){
-                int pixelY = MapPoint.TileSystem.latToPixelY(((JSONObject) strike).optDouble("latitude"),12);
-                int pixelX = MapPoint.TileSystem.longToPixelX(((JSONObject) strike).optDouble("longitude"),12);
-                int tileX = MapPoint.TileSystem.pixelToTile(pixelX);
-                int tileY = MapPoint.TileSystem.pixelToTile(pixelY);
-                String q = MapPoint.TileSystem.tileXYToQuadKey(tileX, tileY, 12);
-
-                if(assets.get(q) !=null && ((JSONObject) strike).optInt("flashType") == 0){
-                    System.out.println(assets.get(q).getAssetName()+":"+assets.get(q).getAssetOwner());
-                    assets.remove(q);
                 }
+
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
