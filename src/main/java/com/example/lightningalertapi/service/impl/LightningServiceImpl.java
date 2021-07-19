@@ -7,9 +7,11 @@ import com.example.lightningalertapi.util.MapPoint;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,10 +21,21 @@ import java.util.Map;
 @Service
 public class LightningServiceImpl implements LightningService {
 
+    @Value("${asset.config.json}")
+    String assetsConfig;
     Map<String, Asset> assets = new HashMap<>();
 
+    @PostConstruct
+    public void init() throws IOException {
+        JsonParser jsonParser = new JsonParser();
+        JSONArray arr = jsonParser.parse(assetsConfig);
+        for(int i = 0; i < arr.size(); i++){
+            JSONObject job = arr.getJSONObject(i);
+            assets.put(job.optString("quadKey"), new Asset(job));
+        }
+    }
+
     //TODO:
-    //asset loading best practice
     //exception
     //error handling
         //empty file
@@ -31,10 +44,6 @@ public class LightningServiceImpl implements LightningService {
     @Override
     public void lightningAlert(MultipartFile file) {
         try {
-            //should not be read everytime endpoint is called
-            //change to asset loading best practice
-            loadAssets();
-
             //stream input
             BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
             while(reader.ready()){
@@ -62,13 +71,13 @@ public class LightningServiceImpl implements LightningService {
         }
     }
 
-    public void loadAssets() throws IOException {
-        JsonParser jsonParser = new JsonParser();
-        JSONArray arr = jsonParser.parse("assets.json");
-        for(int i = 0; i < arr.size(); i++){
-            JSONObject job = arr.getJSONObject(i);
-            assets.put(job.optString("quadKey"), new Asset(job));
-        }
-
-    }
+//    public void loadAssets() throws IOException {
+//        JsonParser jsonParser = new JsonParser();
+//        JSONArray arr = jsonParser.parse(assetsFilename);
+//        for(int i = 0; i < arr.size(); i++){
+//            JSONObject job = arr.getJSONObject(i);
+//            assets.put(job.optString("quadKey"), new Asset(job));
+//        }
+//
+//    }
 }
