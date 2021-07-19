@@ -1,7 +1,14 @@
 # lightning-alert-api
 Lightning Alert App
 
-This Java Spring Boot App exposes an endpoint which accepts lightning strike info in the form of file and alerts user if a known asset has been stricken
+This Java Spring Boot App exposes an HTTP endpoint which accepts lightning strike info in the form of file and alerts user if a known asset has been stricken
+
+example request cURL
+```json
+curl --location --request POST 'localhost:8080/lightning-alert' \
+--form 'file=@"/IdeaProjects/lightning-alert-api/lightning.json"'
+```
+Find lightning.json in repo as sample request file
 
 An example 'strike' coming off of the exchange looks like this:
 
