@@ -16,10 +16,7 @@ import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class LightningServiceImpl implements LightningService {
@@ -28,6 +25,7 @@ public class LightningServiceImpl implements LightningService {
     String assetsConfig;
 
     Map<String, Asset> assets = new HashMap<>();
+    Map<String, Asset> assetsTemp = new HashMap<>();
 
     @PostConstruct
     public void init() throws IOException {
@@ -42,6 +40,7 @@ public class LightningServiceImpl implements LightningService {
     @Override
     public List<String> lightningAlert(MultipartFile file) throws IOException, JSONException {
         //stream input
+        assetsTemp = new HashMap<>(assets);
         List<String> notifs = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
         while (reader.ready()) {
@@ -54,11 +53,11 @@ public class LightningServiceImpl implements LightningService {
                     strike.containsKey("latitude") && strike.containsKey("longitude")) {
 
                 String quadKey = MapPoint.TileSystem.getQuadKey(strike.optDouble("latitude"), strike.optDouble("longitude"), 12);
-                if (assets.get(quadKey) != null) {
-                    String notif = "lightning alert for " + assets.get(quadKey).getAssetOwner() + ":" + assets.get(quadKey).getAssetName();
+                if (assetsTemp.get(quadKey) != null) {
+                    String notif = "lightning alert for " + assetsTemp.get(quadKey).getAssetOwner() + ":" + assetsTemp.get(quadKey).getAssetName();
                     notifs.add(notif);
                     System.out.println(notif);
-                    assets.remove(quadKey);//dont notify anymore. remove from list to be notified
+                    assetsTemp.remove(quadKey);//dont notify anymore. remove from list to be notified
                 }
             }
         }
