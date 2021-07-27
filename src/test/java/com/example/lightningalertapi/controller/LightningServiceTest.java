@@ -12,8 +12,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.FileInputStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LightningServiceTest {
 
@@ -41,17 +40,10 @@ public class LightningServiceTest {
         assertTrue(actualMessage.contains(LightningServiceImpl.FILE_NOT_IN_JSON));
     }
 
-//    @Test()
-//    void emptyFileShouldReturnEmptyList() throws Exception {
-//        FileInputStream inputFile = new FileInputStream( "empty.json");
-//        MockMultipartFile file = new MockMultipartFile("empty.json", "empty.json", "multipart/form-data", inputFile);
-//
-//        Exception exception = assertThrows(ServiceException.class, () -> {
-//            service.lightningAlert(file);
-//        });
-//
-//        String actualMessage = exception.getMessage();
-//
-//        assertTrue(actualMessage.contains(LightningServiceImpl.FILE_NOT_IN_JSON));
-//    }
+    @Test()
+    void emptyFileShouldReturnEmptyList() throws Exception {
+        FileInputStream inputFile = new FileInputStream( "empty.json");
+        MockMultipartFile file = new MockMultipartFile("empty.json", "empty.json", "multipart/form-data", inputFile);
+        assertTrue(service.lightningAlert(file).isEmpty());
+    }
 }
