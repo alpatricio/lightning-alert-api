@@ -31,6 +31,8 @@ class LightningAlertApiApplicationTests {
             "    \"assetOwner\":\"6720\"\n" +
             "  }";
 
+
+
     @Test
     void contextLoads() {
 

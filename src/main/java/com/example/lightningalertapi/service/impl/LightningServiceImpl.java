@@ -1,52 +1,55 @@
 package com.example.lightningalertapi.service.impl;
 
+import com.example.lightningalertapi.exception.ServiceException;
 import com.example.lightningalertapi.model.Asset;
+import com.example.lightningalertapi.repository.AssetRepository;
 import com.example.lightningalertapi.service.LightningService;
-import com.example.lightningalertapi.util.JsonParser;
 import com.example.lightningalertapi.util.MapPoint;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class LightningServiceImpl implements LightningService {
 
-    @Value("${asset.config.json}")
-    String assetsConfig;
+    public static final String FILE_NOT_IN_JSON = "FILE NOT IN JSON FORMAT";
+    public static final String INVALID_FILE = "INVALID FILE";
 
-    Map<String, Asset> assets = new HashMap<>();
-    Map<String, Asset> assetsTemp = new HashMap<>();
-
-    @PostConstruct
-    public void init() throws IOException {
-        JsonParser jsonParser = new JsonParser();
-        JSONArray arr = jsonParser.parse(assetsConfig);
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject job = arr.getJSONObject(i);
-            assets.put(job.optString("quadKey"), new Asset(job));
-        }
-    }
+    @Autowired
+    AssetRepository assetRepository;
 
     @Override
-    public List<String> lightningAlert(MultipartFile file) throws IOException, JSONException {
-        //stream input
-        assetsTemp = new HashMap<>(assets);
+    public List<String> lightningAlert(MultipartFile file) throws ServiceException {
+        Map<String, Asset> assetsTemp = new HashMap<>(assetRepository.getMappedAssets());
         List<String> notifs = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-        while (reader.ready()) {
-            String line = reader.readLine();
-            JSONObject strike = (JSONObject) JSONSerializer.toJSON(line);
+        try {
+            //stream input
+            BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            while (reader.ready()) {
+                processLine(assetsTemp, notifs, reader);
+            }
+        } catch (IOException ioException) {
+            throw new ServiceException(INVALID_FILE);
+        }
 
+        return notifs;
+    }
+
+    private void processLine(Map<String, Asset> assetsTemp, List<String> notifs, BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        try{
+            JSONObject strike = (JSONObject) JSONSerializer.toJSON(line);
             //ignore flashType 1 : cloud to cloud & flashType 9 : heartbeat
             //accept flashType 0: cloud to ground
             if (strike.containsKey("flashType") && strike.optInt("flashType") == 0 &&
@@ -60,7 +63,8 @@ public class LightningServiceImpl implements LightningService {
                     assetsTemp.remove(quadKey);//dont notify anymore. remove from list to be notified
                 }
             }
+        } catch (JSONException jsonException) {
+            throw new ServiceException(FILE_NOT_IN_JSON);
         }
-        return notifs;
     }
 }
